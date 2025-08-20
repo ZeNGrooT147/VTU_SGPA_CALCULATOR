@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VTU SGPA Calculator - AI-Powered PDF Parser</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="logo">
+                <i class="fas fa-graduation-cap"></i>
+                <h1>VTU SGPA Calculator</h1>
+            </div>
+            <p class="subtitle">AI-Powered PDF Parser for VTU Results</p>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Upload Section -->
+            <section class="upload-section" id="uploadSection">
+                <div class="upload-card">
+                    <div class="upload-icon">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                    </div>
+                    <h2>Upload Your VTU Result PDF</h2>
+                    <p>Simply upload your VTU semester result PDF and get instant SGPA calculation</p>
+                    
+                    <div class="upload-area" id="uploadArea">
+                        <input type="file" id="pdfFile" accept=".pdf" hidden>
+                        <div class="upload-text">
+                            <i class="fas fa-file-pdf"></i>
+                            <p>Click to select PDF or drag & drop here</p>
+                            <span class="file-info">Supports A4, A3 page sizes</span>
+                        </div>
+                    </div>
+
+                    <!-- Gemini AI Setup -->
+                    <div class="ai-setup">
+                        <h3><i class="fas fa-robot"></i> Gemini AI Integration (Optional)</h3>
+                        <p>For enhanced accuracy, add your Gemini API key:</p>
+                        <div class="api-input">
+                            <input type="password" id="apiKey" placeholder="Enter Gemini API Key (optional)">
+                            <button type="button" id="toggleKey" class="toggle-btn">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                        <a href="https://makersuite.google.com/app/apikey" target="_blank" class="api-link">
+                            <i class="fas fa-external-link-alt"></i> Get Free API Key
+                        </a>
+                    </div>
+
+                    <button class="upload-btn" id="uploadBtn" disabled>
+                        <i class="fas fa-upload"></i> Process PDF
+                    </button>
+                </div>
+            </section>
+
+            <!-- Loading Section -->
+            <section class="loading-section" id="loadingSection" style="display: none;">
+                <div class="loading-card">
+                    <div class="spinner"></div>
+                    <h3>Processing Your PDF...</h3>
+                    <p>Our AI is analyzing your VTU result document</p>
+                    <div class="progress-bar">
+                        <div class="progress-fill"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Results Section -->
+            <section class="results-section" id="resultsSection" style="display: none;">
+                <div class="results-card">
+                    <div class="results-header">
+                        <h2><i class="fas fa-chart-line"></i> Results Summary</h2>
+                        <button class="new-upload-btn" id="newUploadBtn">
+                            <i class="fas fa-plus"></i> New Upload
+                        </button>
+                    </div>
+
+                    <!-- Scheme & Branch Info -->
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <span class="label">Detected Scheme:</span>
+                            <span class="value" id="schemeInfo">2022</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="label">Detected Branch:</span>
+                            <span class="value" id="branchInfo">Computer Science</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="value" id="sgpaInfo">SGPA: 8.45</span>
+                        </div>
+                    </div>
+
+                    <!-- Subjects Table -->
+                    <div class="table-container">
+                        <table class="results-table">
+                            <thead>
+                                <tr>
+                                    <th>Subject Code</th>
+                                    <th>Subject Name</th>
+                                    <th>Internal</th>
+                                    <th>External</th>
+                                    <th>Total</th>
+                                    <th>Result</th>
+                                    <th>Credits</th>
+                                    <th>Grade</th>
+                                    <th>Grade Points</th>
+                                    <th>Credit Points</th>
+                                </tr>
+                            </thead>
+                            <tbody id="subjectsTableBody">
+                                <!-- Subjects will be populated here -->
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Summary Stats -->
+                    <div class="summary-stats">
+                        <div class="stat-item">
+                            <span class="stat-label">Total Subjects</span>
+                            <span class="stat-value" id="totalSubjects">9</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Passed</span>
+                            <span class="stat-value passed" id="passedSubjects">9</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Total Credits</span>
+                            <span class="stat-value" id="totalCredits">22</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Total Credit Points</span>
+                            <span class="stat-value" id="totalCreditPoints">186.0</span>
+                        </div>
+                    </div>
+
+                    <!-- Download Results -->
+                    <div class="download-section">
+                        <button class="download-btn" id="downloadBtn">
+                            <i class="fas fa-download"></i> Download Results
+                        </button>
+                        <button class="share-btn" id="shareBtn">
+                            <i class="fas fa-share"></i> Share Results
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Error Section -->
+            <section class="error-section" id="errorSection" style="display: none;">
+                <div class="error-card">
+                    <div class="error-icon">
+                        <i class="fas fa-exclamation-triangle"></i>
+                    </div>
+                    <h3>Oops! Something went wrong</h3>
+                    <p id="errorMessage">Unable to process your PDF. Please try again.</p>
+                    <button class="retry-btn" id="retryBtn">
+                        <i class="fas fa-redo"></i> Try Again
+                    </button>
+                </div>
+            </section>
+        </main>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <p>&copy; 2024 VTU SGPA Calculator. Built with ❤️ for VTU Students</p>
+        </footer>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
