@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VTU SGPA Calculator - 2022 Scheme</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="vtu-header">
+            <div class="vtu-logo-section">
+                <div class="vtu-logo">VTU</div>
+                <div class="vtu-title">
+                    <h1>SGPA Calculator - 2022 Scheme</h1>
+                    <p class="regulation-text">As per VTU Regulations 2022</p>
+                </div>
+            </div>
+        </header>
+
+        <!-- Initial Setup Section -->
+        <section class="setup-section card" style="display: none;">
+            <div class="card__body">
+                <h2>Setup Your Calculation</h2>
+                <div class="setup-form">
+                    <div class="form-group">
+                        <label class="form-label">Select Semester</label>
+                        <select id="semesterSelect" class="form-control">
+                            <option value="">Choose Semester</option>
+                            <option value="1">1st Semester</option>
+                            <option value="2">2nd Semester</option>
+                            <option value="3">3rd Semester</option>
+                            <option value="4">4th Semester</option>
+                            <option value="5">5th Semester</option>
+                            <option value="6">6th Semester</option>
+                            <option value="7">7th Semester</option>
+                            <option value="8">8th Semester</option>
+                            <option value="lateral">Lateral Entry (3rd Sem onwards)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Select Branch</label>
+                        <select id="branchSelect" class="form-control">
+                            <option value="">Choose Branch</option>
+                            <option value="CS">Computer Science & Engineering (CS)</option>
+                            <option value="EC">Electronics & Communication Engineering (EC)</option>
+                            <option value="ME">Mechanical Engineering (ME)</option>
+                            <option value="CE">Civil Engineering (CE)</option>
+                            <option value="IS">Information Science & Engineering (IS)</option>
+                            <option value="EE">Electrical Engineering (EE)</option>
+                            <option value="CH">Chemical Engineering (CH)</option>
+                            <option value="BT">Biotechnology (BT)</option>
+                            <option value="AE">Aerospace Engineering (AE)</option>
+                            <option value="IE">Industrial Engineering (IE)</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Tab Navigation -->
+        <div class="tab-container">
+            <div class="tab-buttons">
+                <button class="tab-btn active" data-tab="pdf-upload">PDF Upload</button>
+                <button class="tab-btn" data-tab="results">Results</button>
+            </div>
+        </div>
+
+        <!-- PDF Upload Tab -->
+        <div class="tab-content active" id="pdf-upload">
+            <section class="upload-section card">
+                <div class="card__body">
+                    <h2>Upload VTU Transcript PDF</h2>
+                    <div class="upload-area" id="uploadArea">
+                        <div class="upload-icon">📄</div>
+                        <p>Drag and drop your VTU transcript PDF here or click to browse</p>
+                        <small>Supports official VTU transcript formats</small>
+                        <input type="file" id="pdfInput" accept=".pdf" hidden>
+                        <button type="button" class="btn btn--primary" onclick="document.getElementById('pdfInput').click()">
+                            Choose PDF File
+                        </button>
+                    </div>
+                    <div class="upload-status" id="uploadStatus"></div>
+                </div>
+            </section>
+
+            <!-- PDF Processing Progress -->
+            <section class="processing-section card hidden" id="processingSection">
+                <div class="card__body">
+                    <h2>Processing VTU Transcript</h2>
+                    <div class="processing-progress">
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="progressFill"></div>
+                        </div>
+                        <p id="processingText">Extracting course data...</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Extracted Text Preview -->
+            <section class="text-preview-section card hidden" id="textPreviewSection">
+                <div class="card__body">
+                    <h2>Extracted Text Preview</h2>
+                    <p class="text-secondary">Review the extracted text from your VTU transcript:</p>
+                    <textarea id="extractedText" class="form-control" rows="8" readonly></textarea>
+                    <div class="flex gap-16 mt-16">
+                        <button type="button" class="btn btn--primary" id="parseDataBtn">
+                            Parse Course Data
+                        </button>
+                        <button type="button" class="btn btn--secondary" onclick="switchToTab('manual-entry')">
+                            Enter Manually Instead
+                        </button>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- Manual Entry Tab -->
+        <div class="tab-content" id="manual-entry" style="display: none;">
+            <section class="manual-entry-section card">
+                <div class="card__body">
+                    <h2>Enter Course Details</h2>
+                    <p class="text-secondary">Add your courses manually with VTU 2022 grading system</p>
+                    
+                    <!-- VTU Grading Reference -->
+                    <div class="grading-reference">
+                        <h3>VTU 2022 Grading Scale</h3>
+                        <div class="grade-grid">
+                            <div class="grade-item excellent">O: 10 (90-100%)</div>
+                            <div class="grade-item excellent">A+: 9 (80-89%)</div>
+                            <div class="grade-item good">A: 8 (70-79%)</div>
+                            <div class="grade-item good">B+: 7 (60-69%)</div>
+                            <div class="grade-item average">B: 6 (55-59%)</div>
+                            <div class="grade-item average">C: 5 (50-54%)</div>
+                            <div class="grade-item pass">P: 4 (40-49%)</div>
+                            <div class="grade-item fail">F: 0 (0-39%)</div>
+                        </div>
+                    </div>
+
+                    <!-- Course Input Form -->
+                    <div class="course-input-form">
+                        <h4>Add New Course</h4>
+                        <div class="course-form-grid">
+                            <div class="form-group">
+                                <label class="form-label">Course Code</label>
+                                <input type="text" id="courseCode" class="form-control" placeholder="e.g., 22CS101" pattern="[0-9]{2}[A-Z]{2,4}[0-9]{3}">
+                                <small>Format: YYCCNNN (e.g., 22CS101)</small>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Course Name</label>
+                                <input type="text" id="courseName" class="form-control" placeholder="e.g., Programming in C">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Credits</label>
+                                <select id="courseCredits" class="form-control">
+                                    <option value="1">1 Credit</option>
+                                    <option value="2">2 Credits</option>
+                                    <option value="3" selected>3 Credits</option>
+                                    <option value="4">4 Credits</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Grade/Marks</label>
+                                <div class="grade-input-options">
+                                    <select id="gradeSelect" class="form-control">
+                                        <option value="O">O - Outstanding (10)</option>
+                                        <option value="A+" selected>A+ - Excellent (9)</option>
+                                        <option value="A">A - Very Good (8)</option>
+                                        <option value="B+">B+ - Good (7)</option>
+                                        <option value="B">B - Above Average (6)</option>
+                                        <option value="C">C - Average (5)</option>
+                                        <option value="P">P - Pass (4)</option>
+                                        <option value="F">F - Fail (0)</option>
+                                    </select>
+                                    <div class="or-divider">OR</div>
+                                    <input type="number" id="marksInput" class="form-control" placeholder="Enter marks (0-100)" min="0" max="100">
+                                </div>
+                            </div>
+                        </div>
+                        <button type="button" class="btn btn--primary" id="addCourseBtn">Add Course</button>
+                    </div>
+
+                    <!-- Course Table -->
+                    <div class="course-table-section" id="courseTableSection">
+                        <h4>Added Courses</h4>
+                        <div class="table-container">
+                            <table id="courseTable" class="vtu-table">
+                                <thead>
+                                    <tr>
+                                        <th>Course Code</th>
+                                        <th>Course Name</th>
+                                        <th>Credits</th>
+                                        <th>Grade</th>
+                                        <th>Grade Points</th>
+                                        <th>Credit Points</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="courseTableBody">
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="table-footer">
+                            <div class="credit-summary">
+                                <span>Total Credits: <strong id="currentCredits">0</strong></span>
+                                <span class="credit-limit" id="creditLimit">Maximum: 28 credits per semester</span>
+                            </div>
+                            <button type="button" class="btn btn--primary" id="calculateSGPABtn">Calculate SGPA</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- Results Tab -->
+        <div class="tab-content" id="results">
+            <section class="results-section">
+                <!-- SGPA Result Card -->
+                <div class="sgpa-result-card card">
+                    <div class="card__body">
+                        <div class="sgpa-display">
+                            <div class="sgpa-main">
+                                <h2>Your SGPA</h2>
+                                <div class="sgpa-value" id="sgpaValue">0.00</div>
+                                <div class="sgpa-scale">/10.0</div>
+                            </div>
+                            <div class="sgpa-details">
+                                <div class="performance-badge" id="performanceBadge">Not Calculated</div>
+                                <div class="percentage-equiv">
+                                    Equivalent Percentage: <strong id="percentageValue">0.0%</strong>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Summary Statistics -->
+                <div class="stats-grid">
+                    <div class="stat-card card">
+                        <div class="card__body">
+                            <h3>Total Credits</h3>
+                            <div class="stat-value" id="totalCreditsResult">0</div>
+                        </div>
+                    </div>
+                    <div class="stat-card card">
+                        <div class="card__body">
+                            <h3>Credit Points Earned</h3>
+                            <div class="stat-value" id="totalCreditPointsResult">0.0</div>
+                        </div>
+                    </div>
+                    <div class="stat-card card">
+                        <div class="card__body">
+                            <h3>Average Grade</h3>
+                            <div class="stat-value" id="averageGradeResult">-</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Detailed Breakdown -->
+                <div class="card breakdown-card">
+                    <div class="card__body">
+                        <h3>VTU SGPA Calculation Breakdown</h3>
+                        <div class="formula-display">
+                            <strong>SGPA = ∑(Ci × Gi) / ∑Ci</strong>
+                            <small>Where Ci = Credits, Gi = Grade Points</small>
+                        </div>
+                        <div id="calculationBreakdown" class="breakdown-content"></div>
+                    </div>
+                </div>
+
+                <!-- VTU Grade Sheet Format -->
+                <div class="card grade-sheet" id="gradeSheet">
+                    <div class="card__body">
+                        <div class="grade-sheet-header">
+                            <h3>VTU Grade Sheet - Semester Result</h3>
+                            <div class="sheet-info">
+                                <p><strong>Regulation:</strong> 2022 Scheme</p>
+                                <p><strong>Semester:</strong> <span id="sheetSemester">-</span></p>
+                                <p><strong>Branch:</strong> <span id="sheetBranch">-</span></p>
+                                <p><strong>Generated:</strong> <span id="sheetDate"></span></p>
+                            </div>
+                        </div>
+                        <div class="grade-sheet-table">
+                                                               <table class="vtu-table">
+                                       <thead>
+                                           <tr>
+                                               <th>Course Code</th>
+                                               <th>Course Title</th>
+                                               <th>Internal</th>
+                                               <th>External</th>
+                                               <th>Total</th>
+                                               <th>Result</th>
+                                               <th>Credits</th>
+                                               <th>Grade</th>
+                                               <th>Grade Points</th>
+                                               <th>Credit Points</th>
+                                           </tr>
+                                       </thead>
+                                <tbody id="gradeSheetBody">
+                                </tbody>
+                                                                       <tfoot>
+                                           <tr class="total-row">
+                                               <td colspan="2"><strong>Total</strong></td>
+                                               <td colspan="4">-</td>
+                                               <td><strong id="sheetTotalCredits">0</strong></td>
+                                               <td colspan="2">-</td>
+                                               <td><strong id="sheetTotalCreditPoints">0.0</strong></td>
+                                           </tr>
+                                           <tr class="sgpa-row">
+                                               <td colspan="9"><strong>SGPA (Semester Grade Point Average)</strong></td>
+                                               <td><strong id="sheetSGPA">0.00</strong></td>
+                                           </tr>
+                                       </tfoot>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="action-buttons">
+                    <button type="button" class="btn btn--primary" id="exportPDFBtn">Export as PDF</button>
+                    <button type="button" class="btn btn--primary" id="printGradeSheet">Print Grade Sheet</button>
+                    <button type="button" class="btn btn--secondary" id="shareResults">Share Results</button>
+                    <button type="button" class="btn btn--outline" id="resetCalculator">Reset Calculator</button>
+                </div>
+            </section>
+        </div>
+
+        <!-- Help and Information Section -->
+        <section class="help-section card">
+            <div class="card__body">
+                <h2>VTU 2022 Grading System Information</h2>
+                <div class="help-content">
+                    <div class="help-grid">
+                        <div class="help-item">
+                            <h4>Grade Scale</h4>
+                            <ul>
+                                <li><strong>O:</strong> Outstanding (10 points, 90-100%)</li>
+                                <li><strong>A+:</strong> Excellent (9 points, 80-89%)</li>
+                                <li><strong>A:</strong> Very Good (8 points, 70-79%)</li>
+                                <li><strong>B+:</strong> Good (7 points, 60-69%)</li>
+                                <li><strong>B:</strong> Above Average (6 points, 55-59%)</li>
+                                <li><strong>C:</strong> Average (5 points, 50-54%)</li>
+                                <li><strong>P:</strong> Pass (4 points, 40-49%)</li>
+                                <li><strong>F:</strong> Fail (0 points, 0-39%)</li>
+                            </ul>
+                        </div>
+                        <div class="help-item">
+                            <h4>Special Grades</h4>
+                            <ul>
+                                <li><strong>DX:</strong> Attendance below 75%</li>
+                                <li><strong>AU:</strong> Audit course</li>
+                                <li><strong>AB:</strong> Absent</li>
+                                <li><strong>IC:</strong> Incomplete</li>
+                                <li><strong>W:</strong> Withdrawn</li>
+                            </ul>
+                        </div>
+                        <div class="help-item">
+                            <h4>Credit Structure</h4>
+                            <ul>
+                                <li><strong>Regular Students:</strong> 160 total credits</li>
+                                <li><strong>Lateral Entry:</strong> 120 total credits</li>
+                                <li><strong>Per Semester:</strong> Typically 20 credits</li>
+                                <li><strong>Maximum:</strong> 28 credits per semester</li>
+                            </ul>
+                        </div>
+                        <div class="help-item">
+                            <h4>SGPA Calculation</h4>
+                            <p><strong>Formula:</strong> SGPA = ∑(Ci × Gi) / ∑Ci</p>
+                            <p>Where:</p>
+                            <ul>
+                                <li>Ci = Credits for course i</li>
+                                <li>Gi = Grade points for course i</li>
+                                <li>Result rounded to 2 decimal places</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="disclaimer">
+                        <p><strong>Disclaimer:</strong> This is an unofficial calculator. Please verify results with official VTU sources.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div class="loading-overlay hidden" id="loadingOverlay">
+        <div class="loading-content">
+            <div class="vtu-spinner"></div>
+            <h3 id="loadingTitle">Processing</h3>
+            <p id="loadingText">Please wait...</p>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
